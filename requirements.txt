@@ -1,3 +1,5 @@
+annotated-types==0.7.0
+anyio==4.9.0
 asttokens==3.0.0
 click==8.1.8
 comm==0.2.2
@@ -7,6 +9,10 @@ dlib==19.24.8
 executing==2.2.0
 face-recognition==1.3.0
 face_recognition_models==0.3.0
+fastapi==0.115.12
+gunicorn==23.0.0
+h11==0.16.0
+idna==3.10
 ipykernel==6.29.5
 ipython==9.2.0
 ipython_pygments_lexers==1.1.1
@@ -25,12 +31,19 @@ prompt_toolkit==3.0.51
 psutil==7.0.0
 ptyprocess==0.7.0
 pure_eval==0.2.3
+pydantic==2.11.4
+pydantic_core==2.33.2
 Pygments==2.19.1
 python-dateutil==2.9.0.post0
 pyzmq==26.4.0
 setuptools==80.1.0
 six==1.17.0
+sniffio==1.3.1
 stack-data==0.6.3
+starlette==0.46.2
 tornado==6.4.2
 traitlets==5.14.3
+typing-inspection==0.4.0
+typing_extensions==4.13.2
+uvicorn==0.34.2
 wcwidth==0.2.13
