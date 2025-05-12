@@ -31,53 +31,25 @@ jobs:
         with:
           context: .
           push: true
-          tags: ghcr.io/${{ github.repository_owner }}/reksti-face-api:${{ github.sha }}
+          tags: ghcr.io/${{ github.repository_owner }}/reksti-face-api:${{ github.sha }},ghcr.io/${{ github.repository_owner }}/reksti-face-api:latest
           cache-from: type=gha
           cache-to: type=gha,mode=max
       
-      - name: Install Azure CLI
-        run: |
-          curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
-      
-      - name: Login to Azure with Service Principal Credentials
-        env:
-          CLIENT_ID: ${{ secrets.AZUREAPPSERVICE_CLIENTID_67DFB51200E44D1D8B968378463A3A0D }}
-          TENANT_ID: ${{ secrets.AZUREAPPSERVICE_TENANTID_5048BDEFC1314FFD940D45E9090938C6 }}
-          SUBSCRIPTION_ID: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_2000813D965B455EB723BBC624550BFB }}
-        run: |
-          echo "Using client ID: $CLIENT_ID"
-          echo "Using tenant ID: $TENANT_ID"
-          echo "Using subscription ID: $SUBSCRIPTION_ID"
-          
-          # We need to create a password for the service principal
-          # Let's use az ad sp create-for-rbac to create a new credential
-          
-          echo "Creating new service principal credentials..."
-          CREDENTIAL=$(az ad sp create-for-rbac --name "reksti-face-api-github" \
-             --role contributor \
-             --scopes /subscriptions/$SUBSCRIPTION_ID/resourceGroups/DefaultResourceGroup-EUS \
-             --query password -o tsv)
-          
-          if [ -z "$CREDENTIAL" ]; then
-            echo "Failed to create service principal credential"
-            
-            # Alternative approach - try to use az login with the existing credentials
-            echo "Trying to login with managed identity..."
+      - name: Set up Azure CLI
+        uses: azure/cli@v1
+        with:
+          inlineScript: |
+            # Login using managed identity
             az login --identity
-          else
-            # Login with the new credentials
-            az login --service-principal \
-              --username="$CLIENT_ID" \
-              --password="$CREDENTIAL" \
-              --tenant="$TENANT_ID"
-          fi
-      
-      - name: Deploy to Azure Web App using CLI
-        run: |
-          az webapp config container set \
-            --resource-group DefaultResourceGroup-EUS \
-            --name reksti-face-api \
-            --docker-custom-image-name ghcr.io/${{ github.repository_owner }}/reksti-face-api:${{ github.sha }} \
-            --docker-registry-server-url https://ghcr.io \
-            --docker-registry-server-user ${{ github.actor }} \
-            --docker-registry-server-password ${{ secrets.GITHUB_TOKEN }}
+            
+            # Make sure we're using the right subscription
+            az account set --subscription ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_2000813D965B455EB723BBC624550BFB }}
+            
+            # Configure the web app to use the container image
+            az webapp config container set \
+              --name reksti-face-api \
+              --resource-group DefaultResourceGroup-EUS \
+              --docker-custom-image-name ghcr.io/${{ github.repository_owner }}/reksti-face-api:latest \
+              --docker-registry-server-url https://ghcr.io \
+              --docker-registry-server-user ${{ github.actor }} \
+              --docker-registry-server-password ${{ secrets.GITHUB_TOKEN }}
