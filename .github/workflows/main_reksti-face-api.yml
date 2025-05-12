@@ -22,45 +22,23 @@ jobs:
       - name: Set up Python version
         uses: actions/setup-python@v5
         with:
-          python-version: '3.12'  # Changed to 3.12 to match your commands
-
-      - name: Install system dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y cmake build-essential libx11-dev libgtk-3-dev
+          python-version: '3.12'
 
       - name: Create and start virtual environment
         run: |
-          python -m venv venv312  # Using venv312 as in your commands
-          source venv312/bin/activate
+          python -m venv venv
+          source venv/bin/activate
       
-      - name: Install dlib
-        run: |
-          # First check if the custom wheel file exists
-          if [ -f "modules/dlib-19.24.99-cp312-cp312-win_amd64.whl" ]; then
-            echo "Using custom dlib wheel"
-            pip install modules/dlib-19.24.99-cp312-cp312-win_amd64.whl
-          else
-            echo "Custom dlib wheel not found, installing dlib from source"
-            pip install cmake
-            pip install dlib==19.24.0
-          fi
-      
-      - name: Install face_recognition_models
-        run: |
-          pip install git+https://github.com/ageitgey/face_recognition_models
-          pip install face-recognition
-
-      - name: Install other dependencies
-        run: pip install -r requirements.txt
+      - name: Install dependencies
+        run: | 
+        pip install -r requirements.txt
+        pip install modules/dlib-19.24.99-cp312-cp312-win_amd64.whl
+        pip install git+https://github.com/ageitgey/face_recognition_models
         
       # Optional: Add step to run tests here (PyTest, Django test suites, etc.)
 
       - name: Zip artifact for deployment
-        run: |
-          # Make sure we're in the venv for any compiled extensions
-          source venv312/bin/activate
-          zip release.zip ./* -r -x "venv312/*"
+        run: zip release.zip ./* -r
 
       - name: Upload artifact for deployment jobs
         uses: actions/upload-artifact@v4
@@ -68,7 +46,7 @@ jobs:
           name: python-app
           path: |
             release.zip
-            !venv312/
+            !venv/
 
   deploy:
     runs-on: ubuntu-latest
@@ -88,6 +66,7 @@ jobs:
 
       - name: Unzip artifact for deployment
         run: unzip release.zip
+
       
       - name: Login to Azure
         uses: azure/login@v2
@@ -102,3 +81,4 @@ jobs:
         with:
           app-name: 'reksti-face-api'
           slot-name: 'Production'
+          
