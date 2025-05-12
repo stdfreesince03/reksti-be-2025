@@ -32,6 +32,7 @@ jobs:
       - name: Install dependencies
         run: |
           pip install -r requirements.txt
+          pip install cmake==3.25.2
           pip install modules/dlib-19.24.99-cp312-cp312-win_amd64.whl
           pip install git+https://github.com/ageitgey/face_recognition_models
         
