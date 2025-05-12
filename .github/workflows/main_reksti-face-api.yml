@@ -41,7 +41,12 @@ jobs:
       
       - name: Login to Azure with Service Principal Credentials
         run: |
-          az login --service-principal --username ${{ secrets.AZURE_APP_ID }} --password ${{ secrets.AZURE_PASSWORD }} --tenant ${{ secrets.AZURE_TENANT_ID }}
+          echo "Using App ID: ${{ secrets.AZURE_APP_ID }}"
+          echo "Using Tenant ID: ${{ secrets.AZURE_TENANT_ID }}"
+          az login --service-principal \
+            --username=${{ secrets.AZURE_APP_ID }} \
+            --password=${{ secrets.AZURE_PASSWORD }} \
+            --tenant=${{ secrets.AZURE_TENANT_ID }}
       
       - name: Deploy to Azure Web App using CLI
         run: |
