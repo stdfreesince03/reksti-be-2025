@@ -30,10 +30,10 @@ jobs:
           source venv/bin/activate
       
       - name: Install dependencies
-        run: | 
-        pip install -r requirements.txt
-        pip install modules/dlib-19.24.99-cp312-cp312-win_amd64.whl
-        pip install git+https://github.com/ageitgey/face_recognition_models
+        run: |
+          pip install -r requirements.txt
+          pip install modules/dlib-19.24.99-cp312-cp312-win_amd64.whl
+          pip install git+https://github.com/ageitgey/face_recognition_models
         
       # Optional: Add step to run tests here (PyTest, Django test suites, etc.)
 
@@ -66,7 +66,6 @@ jobs:
 
       - name: Unzip artifact for deployment
         run: unzip release.zip
-
       
       - name: Login to Azure
         uses: azure/login@v2
@@ -81,4 +80,3 @@ jobs:
         with:
           app-name: 'reksti-face-api'
           slot-name: 'Production'
-          
