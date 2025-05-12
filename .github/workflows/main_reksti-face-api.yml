@@ -36,10 +36,21 @@ jobs:
           python -m venv venv
           source venv/bin/activate
 
-      - name: Install dlib with CMake policy override
+      - name: Install dlib with patched CMakeLists
         run: |
           python -m pip install --upgrade pip
-          CMAKE_ARGS="-DCMAKE_POLICY_VERSION_MINIMUM=3.5" pip install dlib==19.24.2
+          # Download dlib source
+          pip download --no-binary :all: dlib==19.24.2
+          mkdir -p dlib_fix && tar -xzf dlib-19.24.2.tar.gz -C dlib_fix --strip-components=1
+          cd dlib_fix
+          
+          # Patch the pybind11 CMakeLists.txt file
+          echo "Patching pybind11 CMakeLists.txt"
+          sed -i 's/cmake_minimum_required(VERSION 2.8.12)/cmake_minimum_required(VERSION 3.5)/' dlib/external/pybind11/CMakeLists.txt
+          
+          # Install with patched files
+          pip install .
+          cd ..
       
       - name: Install face_recognition and other dependencies
         run: |
