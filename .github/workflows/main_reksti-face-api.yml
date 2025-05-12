@@ -36,9 +36,10 @@ jobs:
           python -m venv venv
           source venv/bin/activate
 
-      - name: Install cmake and dlib
+      - name: Install dependencies
         run: |
-          pip install cmake==3.5
+          python -m pip install --upgrade pip
+          pip install cmake>=3.5
           pip install dlib==19.24.2
       
       - name: Install face_recognition and other dependencies
