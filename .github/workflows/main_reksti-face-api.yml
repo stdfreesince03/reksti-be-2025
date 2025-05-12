@@ -16,6 +16,7 @@ jobs:
     permissions:
       contents: read
       packages: write
+      id-token: write  # This is the missing permission!
 
     steps:
       - uses: actions/checkout@v4
@@ -40,14 +41,14 @@ jobs:
           cache-to: type=gha,mode=max
       
       - name: Login to Azure
-        uses: azure/login@v2
+        uses: azure/login@v1
         with:
           client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_67DFB51200E44D1D8B968378463A3A0D }}
           tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_5048BDEFC1314FFD940D45E9090938C6 }}
           subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_2000813D965B455EB723BBC624550BFB }}
       
       - name: Deploy to Azure Web App
-        uses: azure/webapps-deploy@v3
+        uses: azure/webapps-deploy@v2
         with:
           app-name: 'reksti-face-api'
           slot-name: 'production'
