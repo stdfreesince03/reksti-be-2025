@@ -16,7 +16,6 @@ jobs:
     permissions:
       contents: read
       packages: write
-      id-token: write  # This is the missing permission!
 
     steps:
       - uses: actions/checkout@v4
@@ -40,16 +39,23 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
       
-      - name: Login to Azure
-        uses: azure/login@v1
-        with:
-          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_67DFB51200E44D1D8B968378463A3A0D }}
-          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_5048BDEFC1314FFD940D45E9090938C6 }}
-          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_2000813D965B455EB723BBC624550BFB }}
+      - name: Install Azure CLI
+        run: |
+          curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
       
-      - name: Deploy to Azure Web App
-        uses: azure/webapps-deploy@v2
-        with:
-          app-name: 'reksti-face-api'
-          slot-name: 'production'
-          images: ghcr.io/${{ github.repository_owner }}/reksti-face-api:${{ github.sha }}
+      - name: Login to Azure with Service Principal Credentials
+        run: |
+          az login --service-principal \
+            --username ${{ secrets.AZURE_APP_ID }} \
+            --password ${{ secrets.AZURE_PASSWORD }} \
+            --tenant ${{ secrets.AZURE_TENANT_ID }}
+      
+      - name: Deploy to Azure Web App using CLI
+        run: |
+          az webapp config container set \
+            --resource-group DefaultResourceGroup-EUS \
+            --name reksti-face-api \
+            --docker-custom-image-name ghcr.io/${{ github.repository_owner }}/reksti-face-api:${{ github.sha }} \
+            --docker-registry-server-url https://ghcr.io \
+            --docker-registry-server-user ${{ github.actor }} \
+            --docker-registry-server-password ${{ secrets.GITHUB_TOKEN }}
