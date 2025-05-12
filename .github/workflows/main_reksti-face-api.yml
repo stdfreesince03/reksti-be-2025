@@ -38,7 +38,7 @@ jobs:
 
       - name: Install cmake and dlib
         run: |
-          pip install cmake==3.25.2
+          pip install cmake==3.5
           pip install dlib==19.24.2
       
       - name: Install face_recognition and other dependencies
