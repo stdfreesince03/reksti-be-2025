@@ -22,12 +22,12 @@ jobs:
       - name: Set up Python version
         uses: actions/setup-python@v5
         with:
-          python-version: '3.12'
+          python-version: '3.9'  # Using Python 3.9 which has better dlib compatibility
 
       - name: Install system dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y build-essential
+          sudo apt-get install -y build-essential cmake
           sudo apt-get install -y libopenblas-dev liblapack-dev
           sudo apt-get install -y libx11-dev libgtk-3-dev
       
@@ -36,18 +36,32 @@ jobs:
           python -m venv venv
           source venv/bin/activate
 
-      - name: Install dlib using pre-built wheel
+      - name: Install compatible dlib
         run: |
           python -m pip install --upgrade pip
-          # Download pre-built wheel for Python 3.12
-          wget https://github.com/jloh02/dlib/releases/download/v19.24.2/dlib-19.24.2-cp312-cp312-linux_x86_64.whl
-          pip install dlib-19.24.2-cp312-cp312-linux_x86_64.whl
+          # Try multiple methods to install dlib
+          echo "Attempting to install dlib via pip"
+          pip install dlib==19.22.0 || \
+          pip install --no-deps dlib==19.22.0 || \
+          pip install --no-cache-dir dlib==19.22.0 || \
+          pip install --no-binary :all: dlib==19.22.0 || \
+          python -m pip install --global-option=build_ext --global-option="-j4" dlib==19.22.0 || \
+          echo "All dlib installation methods failed. Using a workaround method."
+          
+          # If all methods fail, try installing an older version
+          if ! pip show dlib; then
+            echo "Installing older version of dlib"
+            pip install dlib==19.21.1
+          fi
       
       - name: Install face_recognition and other dependencies
         run: |
           pip install face-recognition
           pip install git+https://github.com/ageitgey/face_recognition_models
           pip install -r requirements.txt
+          
+          # Install app-specific requirements for your Azure app
+          pip install gunicorn
         
       # Optional: Add step to run tests here (PyTest, Django test suites, etc.)
 
