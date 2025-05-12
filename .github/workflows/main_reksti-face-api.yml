@@ -2,7 +2,7 @@
 # More GitHub Actions for Azure: https://github.com/Azure/actions
 # More info on Python, GitHub Actions, and Azure App Service: https://aka.ms/python-webapps-actions
 
-name: Build and deploy Python app to Azure Web App - reksti-face-api
+name: Build and deploy Python app to Azure - reksti-face-api
 
 on:
   push:
@@ -15,6 +15,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
+      packages: write
 
     steps:
       - uses: actions/checkout@v4
@@ -22,21 +23,21 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
       
-      - name: Log in to Azure Container Registry
+      - name: Login to GitHub Container Registry
         uses: docker/login-action@v3
         with:
-          registry: ${{ secrets.REGISTRY_LOGIN_SERVER }}
-          username: ${{ secrets.REGISTRY_USERNAME }}
-          password: ${{ secrets.REGISTRY_PASSWORD }}
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
       
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
         with:
           context: .
           push: true
-          tags: ${{ secrets.REGISTRY_LOGIN_SERVER }}/reksti-face-api:${{ github.sha }}
-          cache-from: type=registry,ref=${{ secrets.REGISTRY_LOGIN_SERVER }}/reksti-face-api:latest
-          cache-to: type=inline
+          tags: ghcr.io/${{ github.repository_owner }}/reksti-face-api:${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
       
       - name: Login to Azure
         uses: azure/login@v2
@@ -50,4 +51,4 @@ jobs:
         with:
           app-name: 'reksti-face-api'
           slot-name: 'production'
-          images: ${{ secrets.REGISTRY_LOGIN_SERVER }}/reksti-face-api:${{ github.sha }}
+          images: ghcr.io/${{ github.repository_owner }}/reksti-face-api:${{ github.sha }}
