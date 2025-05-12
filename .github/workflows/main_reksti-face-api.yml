@@ -24,16 +24,28 @@ jobs:
         with:
           python-version: '3.12'
 
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential cmake
+          sudo apt-get install -y libopenblas-dev liblapack-dev
+          sudo apt-get install -y libx11-dev libgtk-3-dev
+      
       - name: Create and start virtual environment
         run: |
-          py -3.12 -m venv venv312
-      
-      - name: Install dependencies
+          python -m venv venv
+          source venv/bin/activate
+
+      - name: Install cmake and dlib
         run: |
           pip install cmake==3.25.2
-          pip install -r requirements.txt
-          pip install modules/dlib-19.24.99-cp312-cp312-win_amd64.whl
+          pip install dlib==19.24.2
+      
+      - name: Install face_recognition and other dependencies
+        run: |
+          pip install face-recognition
           pip install git+https://github.com/ageitgey/face_recognition_models
+          pip install -r requirements.txt
         
       # Optional: Add step to run tests here (PyTest, Django test suites, etc.)
 
